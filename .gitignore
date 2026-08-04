@@ -1,0 +1,13 @@
+# Byte-compiled / cache
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+.venv/
+
+# Local database (chat history) - excluded for privacy
+chat.db
+
+# Secrets
+.env

@@ -1,0 +1,718 @@
+/* ---------- Design tokens ----------
+   Palette derived from the logo mark: a black paper-plane on a mid-gray
+   (#797979) circle. "Own" messages take the mark's black (white in dark
+   mode); "other" messages take the circle's neutral gray. Status dots
+   (online/offline/error) stay real color — that's functional signal, not
+   brand color, and desaturating it would hurt readability for no gain. */
+:root {
+  --bg: #ffffff;
+  --bg-elevated: #f2f2f2;
+  --sidebar-bg: #f6f6f6;
+  --text-primary: #111111;
+  --text-secondary: #6b6b6b;
+  --border: #e2e2e2;
+
+  --bubble-own-bg: #111111;
+  --bubble-own-text: #ffffff;
+  --bubble-other-bg: #ececec;
+  --bubble-other-text: #111111;
+
+  --accent: #111111;
+  --accent-contrast: #ffffff;
+  --focus-ring: rgba(17, 17, 17, 0.14);
+  --online-dot: #34c759;
+  --offline-dot: #8e8e93;
+  --danger: #ff3b30;
+
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+  /* Fixed regardless of theme: the logo's black mark pokes slightly outside
+     its gray circle in the source art, so on a transparent background it
+     reads as black-on-black in dark mode. Giving it a permanent light chip
+     (like most app icons keep their own background across OS themes) keeps
+     it legible everywhere instead of trying to re-theme the artwork itself. */
+  --logo-backdrop: #f2f2f2;
+}
+
+/* Theme is resolved by an inline script in <head> (localStorage, falling
+   back to OS preference) into this attribute before first paint, and by the
+   toggle button afterward — see script.js. A warm charcoal instead of true
+   black — pure #000 read as too stark/cold, so surfaces lean slightly warm
+   (more red/yellow than blue) for a cozier feel. Status dots (green/red)
+   are left alone since those are functional signal, not mood. */
+:root[data-theme="dark"] {
+  --bg: #17140f;
+  --bg-elevated: #211c16;
+  --sidebar-bg: #1c1811;
+  --text-primary: #f2ece2;
+  --text-secondary: #a39a8c;
+  --border: #3a342b;
+
+  --bubble-own-bg: #f2ece2;
+  --bubble-own-text: #17140f;
+  --bubble-other-bg: #2b2620;
+  --bubble-other-text: #f2ece2;
+
+  --accent: #f2ece2;
+  --accent-contrast: #17140f;
+  --focus-ring: rgba(242, 236, 226, 0.16);
+  --online-dot: #30d158;
+  --offline-dot: #8a8072;
+  --danger: #ff453a;
+
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  font-family: "Space Grotesk", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg);
+  color: var(--text-primary);
+}
+
+.screen {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.hidden {
+  display: none !important;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* ---------- Username screen ---------- */
+#username-screen {
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: var(--bg-elevated);
+}
+
+.username-card {
+  background: var(--bg);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  padding: 36px 28px;
+  width: 100%;
+  max-width: 340px;
+  text-align: center;
+}
+
+.brand-logo {
+  width: 84px;
+  height: 84px;
+  display: block;
+  margin: 0 auto 14px;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 50%;
+  background-color: var(--logo-backdrop);
+}
+
+.username-card h1 {
+  margin: 0 0 6px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.username-subtitle {
+  margin: 0 0 22px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+#username-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#username-form input[type="text"] {
+  text-align: center;
+}
+
+/* ---------- App shell ---------- */
+.app-shell {
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.25s ease;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 16px 10px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: contain;
+  object-position: center;
+  background-color: var(--logo-backdrop);
+}
+
+.app-name {
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+.online-summary {
+  padding: 0 16px 10px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.user-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+}
+
+.user-avatar-wrap {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.user-avatar-wrap .status-dot {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--online-dot);
+  border: 2px solid var(--sidebar-bg);
+}
+
+.user-name {
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-footer {
+  padding: 10px 16px 14px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border);
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 40;
+}
+
+/* ---------- Avatars (shared: sidebar + message groups) ---------- */
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* ---------- Main chat column ---------- */
+.chat-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.chat-header h1 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.header-brand-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: contain;
+  object-position: center;
+  background-color: var(--logo-backdrop);
+}
+
+.icon-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.icon-btn:hover {
+  background: var(--bg-elevated);
+}
+
+.hamburger,
+.hamburger::before,
+.hamburger::after {
+  content: "";
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 2px;
+}
+
+.hamburger {
+  position: relative;
+}
+
+.hamburger::before {
+  position: absolute;
+  top: -6px;
+}
+
+.hamburger::after {
+  position: absolute;
+  top: 6px;
+}
+
+.sidebar-close {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.status-indicator {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.status-indicator .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--offline-dot);
+}
+
+.status-indicator.connected .dot {
+  background: var(--online-dot);
+}
+
+.theme-toggle {
+  display: flex; /* unlike the hamburger/close buttons, always visible */
+  flex-shrink: 0;
+}
+
+.theme-toggle svg {
+  width: 17px;
+  height: 17px;
+}
+
+.status-indicator.disconnected .dot {
+  background: var(--danger);
+}
+
+/* ---------- Message area ---------- */
+.message-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-group {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 75%;
+  margin-top: 14px;
+}
+
+.message-group:first-child {
+  margin-top: 0;
+}
+
+.message-group.own {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.message-group.other {
+  align-self: flex-start;
+}
+
+.message-group-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.message-group.own .message-group-content {
+  align-items: flex-end;
+}
+
+.message-group.other .message-group-content {
+  align-items: flex-start;
+}
+
+.sender-name {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin: 0 12px 2px;
+}
+
+.group-time {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin: 3px 12px 0;
+}
+
+.bubble {
+  position: relative;
+  padding: 8px 14px;
+  font-size: 0.94rem;
+  line-height: 1.35;
+  border-radius: 18px;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  max-width: 100%;
+  animation: bubble-in 0.22s ease-out;
+}
+
+.message-group.own .bubble {
+  background: var(--bubble-own-bg);
+  color: var(--bubble-own-text);
+}
+
+.message-group.other .bubble {
+  background: var(--bubble-other-bg);
+  color: var(--bubble-other-text);
+}
+
+/* Flatten the corner nearest the tail on the last bubble in a run.
+   JS marks that bubble with .has-tail — it can't rely on CSS :last-child
+   because the group's timestamp label is appended after it as a sibling. */
+.message-group.own .bubble.has-tail {
+  border-bottom-right-radius: 4px;
+}
+
+.message-group.other .bubble.has-tail {
+  border-bottom-left-radius: 4px;
+}
+
+/* iMessage-style curved tail, built from two stacked pseudo-elements */
+.message-group.own .bubble.has-tail::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  bottom: -2px;
+  right: -7px;
+  width: 20px;
+  height: 20px;
+  background: var(--bubble-own-bg);
+  border-bottom-left-radius: 16px;
+}
+
+.message-group.own .bubble.has-tail::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  right: -11px;
+  width: 11px;
+  height: 20px;
+  background: var(--bg);
+  border-bottom-left-radius: 10px;
+}
+
+.message-group.other .bubble.has-tail::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  bottom: -2px;
+  left: -7px;
+  width: 20px;
+  height: 20px;
+  background: var(--bubble-other-bg);
+  border-bottom-right-radius: 16px;
+}
+
+.message-group.other .bubble.has-tail::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: -11px;
+  width: 11px;
+  height: 20px;
+  background: var(--bg);
+  border-bottom-right-radius: 10px;
+}
+
+@keyframes bubble-in {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.85);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-1px) scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ---------- Typing indicator ---------- */
+.typing-indicator {
+  padding: 0 20px 8px;
+}
+
+.typing-text {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin: 0 4px 4px;
+}
+
+.typing-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--bubble-other-bg);
+  padding: 10px 14px;
+  border-radius: 18px;
+}
+
+.typing-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  animation: typing-bounce 1.2s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes typing-bounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+/* ---------- Message composer ---------- */
+.message-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+#message-input {
+  flex: 1;
+  min-height: 40px;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+
+#message-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+#send-btn {
+  width: 38px;
+  height: 38px;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  opacity: 0.4;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+.message-form.has-text #send-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#send-btn:active {
+  transform: scale(0.9);
+}
+
+/* Shared text input styling (username screen reuses this) */
+input[type="text"] {
+  font-size: 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 14px;
+  min-height: 44px;
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.username-card button[type="submit"] {
+  min-height: 44px;
+  padding: 0 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent-contrast);
+  background-color: var(--accent);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.username-card button[type="submit"]:active {
+  opacity: 0.85;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 50;
+    transform: translateX(-100%);
+    box-shadow: var(--shadow-card);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-close,
+  .sidebar-open {
+    display: flex;
+  }
+
+  .sidebar-backdrop:not(.hidden) {
+    display: block;
+  }
+
+  .message-group {
+    max-width: 88%;
+  }
+}
+
+@media (min-width: 769px) {
+  .sidebar-close,
+  .sidebar-open {
+    display: none !important;
+  }
+
+  .sidebar-backdrop {
+    display: none !important;
+  }
+
+  /* The sidebar already carries the logo; don't repeat it in the main header. */
+  .header-brand-mark {
+    display: none;
+  }
+}

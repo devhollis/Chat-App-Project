@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PaperPlane</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/logo.png') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script>
+    // Resolve the theme before first paint so there's no flash of the wrong
+    // mode: use the user's saved choice if they've toggled before, otherwise
+    // fall back to their OS preference.
+    (function () {
+      var saved = localStorage.getItem("paperplane-theme");
+      var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- Username screen: shown on first load, hidden after "Enter Chat" -->
+  <div id="username-screen" class="screen">
+    <div class="username-card">
+      <img class="brand-logo" src="{{ url_for('static', filename='assets/logo.png') }}" alt="PaperPlane logo">
+      <h1>PaperPlane</h1>
+      <p class="username-subtitle">Enter a name to join the conversation.</p>
+      <form id="username-form">
+        <input
+          type="text"
+          id="username-input"
+          placeholder="Your name"
+          required
+          maxlength="30"
+          autocomplete="off"
+        >
+        <button type="submit" id="enter-chat-btn">Enter Chat</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Chat screen: hidden until a username is set -->
+  <div id="chat-screen" class="screen hidden">
+    <div class="app-shell">
+
+      <!-- Sidebar: branding + online users. Slides in as a drawer on mobile. -->
+      <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+          <div class="brand">
+            <img class="brand-mark" src="{{ url_for('static', filename='assets/logo.png') }}" alt="">
+            <span class="app-name">PaperPlane</span>
+          </div>
+          <button id="sidebar-close" class="icon-btn sidebar-close" aria-label="Close sidebar">&times;</button>
+        </div>
+        <div class="online-summary" id="online-summary">Currently online: 0 users</div>
+        <ul id="user-list" class="user-list"></ul>
+        <div class="sidebar-footer">
+          <span id="message-count">0 messages</span>
+        </div>
+      </aside>
+
+      <div id="sidebar-backdrop" class="sidebar-backdrop hidden"></div>
+
+      <!-- Main conversation -->
+      <div class="chat-main">
+        <header class="chat-header">
+          <button id="sidebar-open" class="icon-btn sidebar-open" aria-label="Show people">
+            <span class="hamburger"></span>
+          </button>
+          <img class="brand-mark header-brand-mark" src="{{ url_for('static', filename='assets/logo.png') }}" alt="">
+          <h1>PaperPlane</h1>
+          <span id="connection-status" class="status-indicator disconnected">
+            <span class="dot"></span> Connecting&hellip;
+          </span>
+          <button id="theme-toggle" class="icon-btn theme-toggle" aria-label="Switch appearance"></button>
+        </header>
+
+        <main id="message-area" class="message-area"></main>
+
+        <div id="typing-indicator" class="typing-indicator hidden">
+          <span id="typing-text" class="typing-text"></span>
+          <div class="typing-bubble">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+
+        <form id="message-form" class="message-form">
+          <input
+            type="text"
+            id="message-input"
+            placeholder="Message"
+            required
+            maxlength="500"
+            autocomplete="off"
+          >
+          <button type="submit" id="send-btn" aria-label="Send">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+              <path d="M12 4l7 8h-4.5v8h-5v-8H5z"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
